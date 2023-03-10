@@ -7,7 +7,7 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   SOURCE_REPO: https://github.com/bitcoin/bitcoin
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }} # please make sure it does not conflict with your github username, otherwise use email
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
@@ -75,7 +75,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: [${{ env.IMAGE_NAME }}, ghcr.io/${{ env.IMAGE_NAME }}]
           flavor: latest=auto
           tags: |
             # set latest tag for default branch
