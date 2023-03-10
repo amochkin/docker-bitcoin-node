@@ -70,15 +70,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set conditional tag name
+        if: github.event_name != 'pull_request' && env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != ''
+        run: |
+          echo "IMAGE_NAME=ghcr.io/${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}" | tee -a $GITHUB_ENV
+
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: |
-            ghcr.io/${{ env.IMAGE_NAME }}
-            ${{ env.IMAGE_NAME }}
+          images: ${{ env.IMAGE_NAME }}
           flavor: latest=auto
           tags: |
             # set latest tag for default branch
