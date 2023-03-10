@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
 
@@ -53,15 +51,22 @@ jobs:
         with:
           platforms: ${{ matrix.platforms }}
 
-      # Login against a Docker registry except on PR
+      # Login against a Docker registry except on PR, push to ghcr.io by default
+      # If DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets are set, push to Docker Hub also
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log into Docker Hub registry
+        if: github.event_name != 'pull_request' && secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != ''
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
