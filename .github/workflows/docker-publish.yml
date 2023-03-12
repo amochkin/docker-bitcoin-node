@@ -84,6 +84,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          config: .github/buildkitd.toml
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           platforms: ${{ env.DOCKER_PLATFORMS }}
