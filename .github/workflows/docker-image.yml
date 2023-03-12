@@ -22,7 +22,7 @@ jobs:
       - name: Platforms matrix
         id: platforms_matrix
         run: |
-          echo "platforms=$(echo '${{ env.DOCKER_PLATFORMS }}' | tr -d ' ' | tr ',' '\n' | jq -R . | jq -s .)"  
+          echo "platforms=$(echo '${{ env.DOCKER_PLATFORMS }}' | tr -d ' ' | tr ',' '\n' | jq -R . | jq -sc .)"  
 
   build:
     needs: matrix
