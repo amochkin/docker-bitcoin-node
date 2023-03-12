@@ -32,7 +32,7 @@ jobs:
 
     strategy:
       matrix:
-        platforms: ${{ needs.matrix.outputs.platforms }}
+        platforms: [${{ fromJSON(needs.matrix.outputs.platforms) }}]
 
     runs-on: ubuntu-latest
 
