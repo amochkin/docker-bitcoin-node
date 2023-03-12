@@ -22,7 +22,7 @@ jobs:
       - name: Platforms matrix
         id: platforms_matrix
         run: |
-          echo "platforms=$(echo '${{ env.DOCKER_PLATFORMS }}' | tr -d ' ' | tr ',' '\n' | jq -R . | jq -sc .)"
+          echo "platforms=$(echo '${{ env.DOCKER_PLATFORMS }}' | tr -d ' ' | tr ',' '\n' | jq -R . | jq -sc .)" >> $GITHUB_OUTPUT
       - name: Print platforms
         run: |
           echo ${{ steps.platforms_matrix.outputs.platforms }}
