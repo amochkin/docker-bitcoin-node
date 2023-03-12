@@ -43,7 +43,7 @@ jobs:
       - name: Setup Docker BuildX
         uses: docker/setup-buildx-action@v2
         with:
-          platforms: env.DOCKER_PLATFORMS
+          platforms: ${{ env.DOCKER_PLATFORMS }}
 
       # Login against a Docker registry except on PR, push to ghcr.io by default
       # If DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets are set, push to Docker Hub also
