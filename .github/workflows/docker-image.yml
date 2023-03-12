@@ -30,6 +30,8 @@ jobs:
   build:
     needs: matrix
 
+    ### We build using matrix to make debugging easier for each platform,
+    ### otherwise BuildX will build all platforms in one go, and it would be a mess
     strategy:
       matrix:
         platforms: ${{ fromJSON(needs.matrix.outputs.platforms) }}
