@@ -43,6 +43,9 @@ jobs:
       - name: Setup Docker BuildX
         uses: docker/setup-buildx-action@v2
         with:
+          config-inline: |
+            [worker.oci]
+              max-parallelism = 1
           platforms: ${{ env.DOCKER_PLATFORMS }}
 
       # Login against a Docker registry except on PR, push to ghcr.io by default
@@ -84,9 +87,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          config-inline: |
-            [worker.oci]
-              max-parallelism = 1
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           platforms: ${{ env.DOCKER_PLATFORMS }}
