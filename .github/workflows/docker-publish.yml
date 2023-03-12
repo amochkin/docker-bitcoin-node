@@ -11,6 +11,7 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
   DOCKERHUB_ORGANIZATION: ${{ secrets.DOCKERHUB_ORGANIZATION || github.actor }}
+  DOCKER_PLATFORMS: ${{ env.DOCKER_PLATFORMS || 'linux/s390x, linux/ppc64le, linux/arm64, linux/arm/v7, linux/arm/v6, linux/amd64, linux/s390x' }}
 
 jobs:
   build:
@@ -42,7 +43,7 @@ jobs:
       - name: Setup Docker BuildX
         uses: docker/setup-buildx-action@v2
         with:
-          platforms: ${{ matrix.platforms }}
+          platforms: env.DOCKER_PLATFORMS
 
       # Login against a Docker registry except on PR, push to ghcr.io by default
       # If DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets are set, push to Docker Hub also
@@ -85,7 +86,7 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
-          platforms: linux/s390x, linux/ppc64le, linux/arm64, linux/arm/v7, linux/arm/v6, linux/amd64, linux/s390x
+          platforms: env.DOCKER_PLATFORMS
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             DOCKER_GIT_SHA=${{ github.sha }}
