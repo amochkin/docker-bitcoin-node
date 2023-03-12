@@ -25,9 +25,11 @@ jobs:
           echo "platforms=$(echo '${{ env.DOCKER_PLATFORMS }}' | tr -d ' ' | tr ',' '\n' | jq -R . | jq -s .)"  
 
   build:
+    needs: matrix
+
     strategy:
       matrix:
-        platforms: ${{ fromJson(needs.matrix.outputs.platforms) }}}
+        platforms: ${{ fromJSON(needs.matrix.outputs.platforms) }}}
 
     runs-on: ubuntu-latest
 
