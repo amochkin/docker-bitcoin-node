@@ -27,7 +27,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platforms: {{ fromJson(needs.matrix.outputs.platforms) }}}
+        platforms: ${{ fromJson(needs.matrix.outputs.platforms) }}}
 
     runs-on: ubuntu-latest
 
