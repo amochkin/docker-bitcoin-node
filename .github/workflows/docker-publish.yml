@@ -14,7 +14,22 @@ env:
   DOCKER_PLATFORMS: ${{ vars.DOCKER_PLATFORMS || 'linux/s390x, linux/ppc64le, linux/arm64, linux/arm/v7, linux/arm/v6, linux/amd64, linux/s390x' }}
 
 jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      platforms: ${{ steps.platforms_matrix.outputs.platforms }}
+    steps:
+      - name: Platforms matrix
+        id: platforms_matrix
+        run: |
+          echo "platforms=$(echo '${{ env.DOCKER_PLATFORMS }}' | tr -d ' ' | tr ',' '\n' | jq -R . | jq -sc .)" >> $GITHUB_OUTPUT
+      - name: Print platforms
+        run: |
+          echo ${{ steps.platforms_matrix.outputs.platforms }}
+
   build:
+    needs: matrix
+
     runs-on: ubuntu-latest
 
     #
@@ -26,6 +41,10 @@ jobs:
       # This is used to complete the identity challenge
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
+
+    strategy:
+      matrix:
+        platforms: ${{ fromJSON(needs.matrix.outputs.platforms) }}
 
     steps:
       - name: Determine latest release version
@@ -95,7 +114,7 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
-          platforms: ${{ env.DOCKER_PLATFORMS }}
+          platforms: ${{ matrix.platforms }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             DOCKER_GIT_SHA=${{ github.sha }}
