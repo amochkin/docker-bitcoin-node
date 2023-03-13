@@ -58,14 +58,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Install the cosign tool except on PR
-      # https://github.com/sigstore/cosign-installer
-      - name: Install cosign
-        if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@main
-        with:
-          cosign-release: 'v2.0.0'
-
       # Set up Docker BuildX
       # https://github.com/docker/setup-buildx-action
       - name: Setup Docker BuildX
@@ -124,6 +116,14 @@ jobs:
             DOCKER_GIT_SHA=${{ github.sha }}
             SOURCE_VERSION=${{ env.SOURCE_VERSION }}
 
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@main
+        with:
+          cosign-release: 'v2.0.0'
+
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
       # repository is public to avoid leaking data.  If you would like to publish
@@ -136,9 +136,13 @@ jobs:
         if: github.event_name != 'pull_request' && env.USE_DOCKERHUB == 'true'
         run: cosign sign -y ${{ env.IMAGE_NAME }}@${{ steps.build_push.outputs.digest }}
 
+  manifest:
+    needs: build
+    name: Create and push Docker manifest
+    runs-on: ubuntu-latest
+    steps:
       - name: Join images
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          echo "docker manifest create ${{ steps.build_push.outputs.digest }}"
-          echo "docker manifest push ${{ steps.meta.outputs.tags }}"
+          echo "needs.build.outputs.images: ${{ needs.build.outputs.images }}"
