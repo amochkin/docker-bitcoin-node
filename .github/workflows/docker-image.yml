@@ -28,6 +28,7 @@ jobs:
           echo ${{ steps.platforms_matrix.outputs.platforms }}
 
   build:
+    timeout-minutes: 60
     needs: matrix
 
     ### We build using matrix to make debugging easier for each platform,

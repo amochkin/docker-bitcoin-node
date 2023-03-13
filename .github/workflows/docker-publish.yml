@@ -29,7 +29,7 @@ jobs:
           echo ${{ steps.platforms_matrix.outputs.platforms }}
 
   build:
-    name: Build and push Docker images
+    name: Build and push
     needs: matrix
 
     runs-on: ubuntu-latest
@@ -138,7 +138,7 @@ jobs:
 
   manifest:
     needs: build
-    name: Create and push Docker manifest
+    name: Manifest setup
     runs-on: ubuntu-latest
     steps:
       - name: Join images
