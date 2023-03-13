@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      images: ${{ steps.build_push.outputs }}
+      digests: ${{ steps.build_push.outputs.digest }}
     #
     timeout-minutes: 720
 
@@ -145,4 +145,4 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          echo "needs.build.outputs.images: ${{ needs.build.outputs.images }}"
+          echo "needs.build.outputs.digests: ${{ needs.build.outputs.digests }}"
