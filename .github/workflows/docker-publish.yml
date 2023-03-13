@@ -139,4 +139,6 @@ jobs:
       - name: Join images
         if: ${{ github.event_name != 'pull_request' }}
         run: |
+          export DOCKER_CLI_EXPERIMENTAL=enabled
           echo "docker manifest create ${{ steps.build_push.outputs.digest }}"
+          echo "docker manifest push ${{ steps.meta.outputs.tags }}"
