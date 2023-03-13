@@ -15,6 +15,7 @@ env:
 
 jobs:
   matrix:
+    name: Matrix setup
     runs-on: ubuntu-latest
     outputs:
       platforms: ${{ steps.platforms_matrix.outputs.platforms }}
@@ -28,10 +29,13 @@ jobs:
           echo ${{ steps.platforms_matrix.outputs.platforms }}
 
   build:
+    name: Build and push Docker images
     needs: matrix
 
     runs-on: ubuntu-latest
 
+    outputs:
+      images: ${{ steps.build_push.outputs }}
     #
     timeout-minutes: 720
 
@@ -108,7 +112,7 @@ jobs:
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
-        id: build-and-push
+        id: build_push
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -127,7 +131,12 @@ jobs:
       # https://github.com/sigstore/cosign
       - name: Sign the published Docker image (ghcr.io)
         if: ${{ github.event_name != 'pull_request' }}
-        run: cosign sign -y ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}
+        run: cosign sign -y ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build_push.outputs.digest }}
       - name: Sign the published Docker image (Docker Hub)
         if: github.event_name != 'pull_request' && env.USE_DOCKERHUB == 'true'
-        run: cosign sign -y ${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}
+        run: cosign sign -y ${{ env.IMAGE_NAME }}@${{ steps.build_push.outputs.digest }}
+
+      - name: Join images
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          echo "docker manifest create ${{ steps.build_push.outputs.digest }}"
