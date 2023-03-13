@@ -40,12 +40,14 @@ jobs:
           cosign-release: 'v2.0.0'
 
       # Set up Docker BuildX
+      # https://github.com/docker/setup-buildx-action
       - name: Setup Docker BuildX
         uses: docker/setup-buildx-action@v2
         with:
+          #
           config-inline: |
             [worker.oci]
-              max-parallelism = 1
+              max-parallelism = 2
           platforms: ${{ env.DOCKER_PLATFORMS }}
 
       # Login against a Docker registry except on PR, push to ghcr.io by default
@@ -100,9 +102,9 @@ jobs:
       # repository is public to avoid leaking data.  If you would like to publish
       # transparency data even for private images, pass --force to cosign below.
       # https://github.com/sigstore/cosign
-      - name: Sign the published Docker image
+      - name: Sign the published Docker image (ghcr.io)
         if: ${{ github.event_name != 'pull_request' }}
         run: cosign sign -y ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}
-      - name: Sign the published Docker image
+      - name: Sign the published Docker image (Docker Hub)
         if: github.event_name != 'pull_request' && env.USE_DOCKERHUB == 'true'
         run: cosign sign -y ${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}
