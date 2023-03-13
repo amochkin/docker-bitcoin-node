@@ -14,23 +14,26 @@ env:
   DOCKER_PLATFORMS: ${{ vars.DOCKER_PLATFORMS || 'linux/s390x, linux/ppc64le, linux/arm64, linux/arm/v7, linux/arm/v6, linux/amd64, linux/386' }}
 
 jobs:
-  matrix:
-    name: Matrix setup
-    runs-on: ubuntu-latest
-    outputs:
-      platforms: ${{ steps.platforms_matrix.outputs.platforms }}
-    steps:
-      - name: Platforms matrix
-        id: platforms_matrix
-        run: |
-          echo "platforms=$(echo '${{ env.DOCKER_PLATFORMS }}' | tr -d ' ' | tr ',' '\n' | jq -R . | jq -sc .)" >> $GITHUB_OUTPUT
-      - name: Print platforms
-        run: |
-          echo ${{ steps.platforms_matrix.outputs.platforms }}
+#  matrix:
+#    name: Matrix setup
+#    runs-on: ubuntu-latest
+#    outputs:
+#      platforms: ${{ steps.platforms_matrix.outputs.platforms }}
+#      platforms_safe: ${{ steps.platforms_matrix.outputs.platforms_safe }}
+#    steps:
+#      - name: Platforms matrix
+#        id: platforms_matrix
+#        run: |
+#          echo "platforms=$(echo '${{ env.DOCKER_PLATFORMS }}' | tr -d ' ' | tr ',' '\n' | jq -R . | jq -sc .)" >> $GITHUB_OUTPUT
+#          echo "platforms_safe=$(echo '${{ env.DOCKER_PLATFORMS }}' | tr -d ' ' | tr '/' '_' | tr ',' '\n' | jq -R . | jq -sc .)" >> $GITHUB_OUTPUT
+#      - name: Print platforms
+#        run: |
+#          echo ${{ steps.platforms_matrix.outputs.platforms }}
+#          echo ${{ steps.platforms_matrix.outputs.platforms_safe }}
 
   build:
     name: Build and push
-    needs: matrix
+#    needs: matrix
 
     runs-on: ubuntu-latest
 
@@ -46,9 +49,9 @@ jobs:
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
 
-    strategy:
-      matrix:
-        platforms: ${{ fromJSON(needs.matrix.outputs.platforms) }}
+#    strategy:
+#      matrix:
+#        platforms: ${{ fromJSON(needs.matrix.outputs.platforms) }}
 
     steps:
       - name: Determine latest release version
@@ -66,7 +69,7 @@ jobs:
           #
           config-inline: |
             [worker.oci]
-              max-parallelism = 2
+              max-parallelism = 1
           platforms: ${{ env.DOCKER_PLATFORMS }}
 
       # Login against a Docker registry except on PR, push to ghcr.io by default
@@ -110,7 +113,7 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
-          platforms: ${{ matrix.platforms }}
+          platforms: ${{ env.DOCKER_PLATFORMS }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             DOCKER_GIT_SHA=${{ github.sha }}
@@ -136,13 +139,13 @@ jobs:
         if: github.event_name != 'pull_request' && env.USE_DOCKERHUB == 'true'
         run: cosign sign -y ${{ env.IMAGE_NAME }}@${{ steps.build_push.outputs.digest }}
 
-  manifest:
-    needs: build
-    name: Manifest setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Join images
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          export DOCKER_CLI_EXPERIMENTAL=enabled
-          echo "needs.build.outputs.digests: ${{ needs.build.outputs.digests }}"
+#  manifest:
+#    needs: build
+#    name: Manifest setup
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Join images
+#        if: ${{ github.event_name != 'pull_request' }}
+#        run: |
+#          export DOCKER_CLI_EXPERIMENTAL=enabled
+#          echo "needs.build.outputs.digests: ${{ needs.build.outputs.digests }}"
