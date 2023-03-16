@@ -2,12 +2,11 @@ name: Docker Publish
 
 on:
   workflow_dispatch:
-
-inputs:
-  mark_latest:
-    description: 'Mark the image as latest'
-    required: false
-    default: 'true'
+    inputs:
+      mark_latest:
+        description: 'Mark the image as latest'
+        required: false
+        default: 'true'
 
 env:
   # github.repository as <account>/<repo>
