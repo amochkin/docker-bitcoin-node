@@ -3,6 +3,12 @@ name: Docker Publish
 on:
   workflow_dispatch:
 
+inputs:
+  mark_latest:
+    description: 'Mark the image as latest'
+    required: false
+    default: 'true'
+
 env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
@@ -57,6 +63,7 @@ jobs:
       - name: Determine latest release version
         run: |
           echo "SOURCE_VERSION=$(basename $(curl -Ls -o /dev/null -w %{url_effective} ${SOURCE_REPO}/releases/latest))" | tee -a $GITHUB_ENV
+          echo "IS_LATEST=${{ github.event.inputs.push || true }}" | tee -a $GITHUB_ENV
 
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -101,7 +108,7 @@ jobs:
           flavor: latest=auto
           tags: |
             # set latest tag for default branch
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ env.IS_LATEST == 'true' }}
             type=raw,value=${{ env.SOURCE_VERSION }}
 
       # Build and push Docker image with Buildx (don't push on PR)
